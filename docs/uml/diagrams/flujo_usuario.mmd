@@ -1,0 +1,29 @@
+﻿graph TD
+    classDef persona fill:#fef3c7,stroke:#facc15,stroke-width:2px;
+    classDef ui fill:#e0f2fe,stroke:#2563eb,stroke-width:2px;
+    classDef backend fill:#fae8ff,stroke:#c026d3,stroke-width:2px;
+    classDef correo fill:#dcfce7,stroke:#16a34a,stroke-width:2px;
+
+    A[1. Cliente llega a la sede y escanea QR /aceptacion?sede=kennedy]:::persona
+    B[2. Frontend Next.js muestra Welcome + 5 pasos guiados]:::ui
+    C{3. Validaciones Zod + React Hook Form}:::ui
+    D[4. UI solicita token GET /session-token anti spam]:::ui
+    E[5. Cliente revisa terminos HTML, consents y firma digital]:::persona
+    F[6. Frontend empaqueta formulario + consentimientos + token]:::ui
+    G[7. API POST /aceptaciones NestJS DTO + ValidationPipe]:::backend
+    H[8. Prisma guarda en MySQL y emite transactionId]:::backend
+    I[9. Servicio de correos crea logs y dispara Gmail SMTP]:::backend
+    J[10. Cliente ve pantalla de exito + recibe comprobantes]:::persona
+    K[11. Copia oculta llega al administrador correoAdmin de la sede]:::correo
+
+    A --> B
+    B --> C
+    C -->|Corrige datos| B
+    C -->|Todo ok| D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    I --> K

@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #030712;
+  color: white;
+  font-family: var(--font-inter);
+  min-height: 100dvh;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* Terms viewer */
+.terms-content {
+  @apply text-gray-300 text-sm leading-relaxed;
+}
+.terms-content h2 {
+  @apply text-white font-bold text-base mt-6 mb-3;
+}
+.terms-content h3 {
+  @apply text-brand-400 font-semibold text-sm mt-4 mb-2;
+}
+.terms-content p {
+  @apply mb-3;
+}
+.terms-content ul, .terms-content ol {
+  @apply pl-5 mb-3 space-y-1;
+}
+.terms-content li {
+  @apply list-disc;
+}
+
+/* Signature canvas */
+.signature-canvas-wrapper canvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Form inputs */
+.form-input {
+  @apply w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3
+         text-white placeholder-gray-500 text-sm
+         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+         transition-colors duration-200;
+}
+.form-input-error {
+  @apply border-red-500 focus:ring-red-500;
+}
+.form-label {
+  @apply block text-sm font-medium text-gray-300 mb-1.5;
+}
+.form-error {
+  @apply text-red-400 text-xs mt-1;
+}

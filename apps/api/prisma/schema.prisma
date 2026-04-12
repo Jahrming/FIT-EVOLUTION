@@ -1,0 +1,279 @@
+// apps/api/prisma/schema.prisma
+// FIT_EVOLUTION360 — Prisma Schema v1.0 (MySQL Version)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMERACIONES
+// ============================================================
+
+enum EstadoTerminos {
+  BORRADOR
+  REVISION
+  ACTIVO
+  ARCHIVADO
+}
+
+enum TipoDocumento {
+  CC
+  CE
+  PA
+  TI
+  NIT
+}
+
+enum EstadoAceptacion {
+  PENDIENTE
+  COMPLETADO
+  ERROR
+}
+
+enum EstadoCorreo {
+  PENDIENTE
+  ENVIADO
+  FALLIDO
+  REINTENTANDO
+}
+
+enum TipoCorreo {
+  USUARIO
+  ADMINISTRACION
+}
+
+enum NombreRol {
+  SUPERADMIN
+  ADMIN_SEDE
+  RECEPCIONISTA
+  AUDITOR
+}
+
+// ============================================================
+// SEDES
+// ============================================================
+
+model Sede {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  nombre       String
+  ciudad       String
+  direccion    String?
+  telefono     String?
+  correoAdmin  String   @map("correo_admin")
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  terminosVersiones TerminosVersion[]
+  aceptaciones      Aceptacion[]
+  adminSedes        UsuarioAdminSede[]
+
+  @@map("sedes")
+}
+
+// ============================================================
+// VERSIONES DE TÉRMINOS Y CONDICIONES
+// ============================================================
+
+model TerminosVersion {
+  id             String         @id @default(uuid())
+  sedeId         String?        @map("sede_id")
+  numeroVersion  Int            @map("numero_version")
+  titulo         String
+  estado         EstadoTerminos @default(BORRADOR)
+  contenidoHtml  String         @map("contenido_html") @db.Text
+  contenidoHash  String         @map("contenido_hash")
+  pdfUrl         String?        @map("pdf_url")
+  notas          String?
+  publicadoPorId String?        @map("publicado_por_id")
+  publicadoAt    DateTime?      @map("publicado_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  sede         Sede?         @relation(fields: [sedeId], references: [id])
+  publicadoPor UsuarioAdmin? @relation(fields: [publicadoPorId], references: [id])
+  aceptaciones Aceptacion[]
+
+  @@unique([sedeId, numeroVersion])
+  @@index([sedeId, estado])
+  @@map("terminos_versiones")
+}
+
+// ============================================================
+// SESIÓN TOKEN — Anti double-submit
+// ============================================================
+
+model SesionToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @default(uuid())
+  sedeSlug  String   @map("sede_slug")
+  usado     Boolean  @default(false)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  usadoAt   DateTime? @map("usado_at")
+
+  @@index([token])
+  @@map("sesion_tokens")
+}
+
+// ============================================================
+// ACEPTACIONES — Evento central del sistema
+// ============================================================
+
+model Aceptacion {
+  id            String          @id @default(uuid())
+  transactionId String          @unique @default(uuid()) @map("transaction_id")
+  estado        EstadoAceptacion @default(PENDIENTE)
+
+  sedeId              String @map("sede_id")
+  terminosVersionId   String @map("terminos_version_id")
+
+  // Datos del usuario
+  nombreCompleto    String        @map("nombre_completo")
+  tipoDocumento     TipoDocumento @map("tipo_documento")
+  numeroDocumento   String        @map("numero_documento")
+  fechaNacimiento   DateTime      @map("fecha_nacimiento") @db.Date
+
+  // Contacto (cifrar correo a nivel aplicación)
+  telefono           String
+  correoElectronico  String @map("correo_electronico")
+
+  // Consentimientos
+  aceptaTerminos         Boolean @default(false) @map("acepta_terminos")
+  aceptaTratamientoDatos Boolean @default(false) @map("acepta_tratamiento_datos")
+  declaraCondicionFisica Boolean @default(false) @map("declara_condicion_fisica")
+  autorizaUsoImagen      Boolean @default(false) @map("autoriza_uso_imagen")
+  autorizaComunicaciones Boolean @default(false) @map("autoriza_comunicaciones")
+
+  // Contacto emergencia
+  contactoEmergenciaNombre   String? @map("contacto_emergencia_nombre")
+  contactoEmergenciaTelefono String? @map("contacto_emergencia_telefono")
+
+  // Trazabilidad técnica
+  ipAddress    String @map("ip_address")
+  userAgent    String @map("user_agent")
+  metadataExtra Json? @map("metadata_extra")
+
+  // Evidencias
+  firmaUrl              String? @map("firma_url")
+  pdfUrl                String? @map("pdf_url")
+  documentoHashAceptado String  @map("documento_hash_aceptado")
+
+  // Timestamps
+  timestampInicio DateTime? @map("timestamp_inicio")
+  timestampFirma  DateTime  @default(now()) @map("timestamp_firma")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  sede            Sede            @relation(fields: [sedeId], references: [id])
+  terminosVersion TerminosVersion @relation(fields: [terminosVersionId], references: [id])
+  correosLog      CorreoLog[]
+
+  @@index([sedeId, createdAt])
+  @@index([numeroDocumento])
+  @@index([correoElectronico])
+  @@index([transactionId])
+  @@index([estado])
+  @@map("aceptaciones")
+}
+
+// ============================================================
+// LOG DE CORREOS
+// ============================================================
+
+model CorreoLog {
+  id           String     @id @default(uuid())
+  aceptacionId String     @map("aceptacion_id")
+  tipo         TipoCorreo
+  destinatario String
+  estado       EstadoCorreo @default(PENDIENTE)
+  proveedorId  String?    @map("proveedor_id")
+  intentos     Int        @default(0)
+  ultimoError  String?    @map("ultimo_error")
+  enviadoAt    DateTime?  @map("enviado_at")
+  ultimoIntentoAt DateTime? @map("ultimo_intento_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  aceptacion   Aceptacion @relation(fields: [aceptacionId], references: [id])
+
+  @@index([aceptacionId])
+  @@index([estado])
+  @@map("correos_log")
+}
+
+// ============================================================
+// USUARIOS ADMINISTRATIVOS
+// ============================================================
+
+model Rol {
+  id          String    @id @default(uuid())
+  nombre      NombreRol @unique
+  descripcion String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  usuariosAdmin UsuarioAdmin[]
+
+  @@map("roles")
+}
+
+model UsuarioAdmin {
+  id           String   @id @default(uuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  rolId        String   @map("rol_id")
+  activo       Boolean  @default(true)
+  ultimoLogin  DateTime? @map("ultimo_login")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  rol                  Rol               @relation(fields: [rolId], references: [id])
+  sedes                UsuarioAdminSede[]
+  terminosPublicados   TerminosVersion[]
+  auditoriaLogs        AuditoriaLog[]
+
+  @@map("usuarios_admin")
+}
+
+model UsuarioAdminSede {
+  usuarioAdminId String @map("usuario_admin_id")
+  sedeId         String @map("sede_id")
+  asignadoAt     DateTime @default(now()) @map("asignado_at")
+
+  usuarioAdmin UsuarioAdmin @relation(fields: [usuarioAdminId], references: [id])
+  sede         Sede         @relation(fields: [sedeId], references: [id])
+
+  @@id([usuarioAdminId, sedeId])
+  @@map("usuarios_admin_sedes")
+}
+
+// ============================================================
+// AUDITORÍA
+// ============================================================
+
+model AuditoriaLog {
+  id             String  @id @default(uuid())
+  usuarioAdminId String? @map("usuario_admin_id")
+  accion         String
+  entidad        String?
+  entidadId      String? @map("entidad_id")
+  detalle        Json?
+  ipAddress      String? @map("ip_address")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  usuarioAdmin UsuarioAdmin? @relation(fields: [usuarioAdminId], references: [id])
+
+  @@index([usuarioAdminId])
+  @@index([accion])
+  @@index([createdAt])
+  @@map("auditoria_logs")
+}

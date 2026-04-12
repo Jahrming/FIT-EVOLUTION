@@ -1,0 +1,102 @@
+﻿erDiagram
+    SEDE ||--o{ TERMINOS_VERSION : "publica"
+    SEDE ||--o{ ACEPTACION : "registra"
+    TERMINOS_VERSION ||--o{ ACEPTACION : "respalda"
+    ACEPTACION ||--o{ CORREO_LOG : "emite"
+    SEDE ||--o{ USUARIO_ADMIN_SEDE : "asigna"
+    USUARIO_ADMIN ||--o{ USUARIO_ADMIN_SEDE : "opera"
+    ROL ||--o{ USUARIO_ADMIN : "perfila"
+    USUARIO_ADMIN ||--o{ AUDITORIA_LOG : "audita"
+
+    SEDE {
+        string id PK "uuid"
+        string slug "kennedy"
+        string nombre
+        string ciudad
+        string direccion "opcional"
+        string correoAdmin
+        boolean activo
+        datetime createdAt
+    }
+
+    TERMINOS_VERSION {
+        string id PK
+        string sedeId FK
+        int numeroVersion
+        enum estado "BORRADOR/ACTIVO"
+        text contenidoHtml
+        string contenidoHash
+        datetime publicadoAt "opcional"
+    }
+
+    SESION_TOKEN {
+        string id PK
+        string token "unique"
+        string sedeSlug
+        boolean usado
+        datetime expiresAt
+    }
+
+    ACEPTACION {
+        string id PK
+        string sedeId FK
+        string terminosVersionId FK
+        string transactionId "unique"
+        enum estado "PENDIENTE/COMPLETADO"
+        string nombreCompleto
+        enum tipoDocumento
+        string numeroDocumento
+        string correoElectronico
+        string telefono
+        boolean aceptaTerminos
+        boolean aceptaTratamientoDatos
+        boolean declaraCondicionFisica
+        boolean autorizaUsoImagen
+        json metadataExtra "opcional"
+        string documentoHashAceptado
+        datetime timestampFirma
+    }
+
+    CORREO_LOG {
+        string id PK
+        string aceptacionId FK
+        enum tipo "USUARIO/ADMIN"
+        enum estado "PENDIENTE/ENVIADO/FALLIDO"
+        string destinatario
+        string proveedorId "opcional"
+        int intentos
+        datetime enviadoAt "opcional"
+    }
+
+    ROL {
+        string id PK
+        enum nombre "SUPERADMIN/ADMIN_SEDE/..."
+        string descripcion "opcional"
+    }
+
+    USUARIO_ADMIN {
+        string id PK
+        string nombre
+        string email "unique"
+        string passwordHash
+        string rolId FK
+        boolean activo
+        datetime ultimoLogin "opcional"
+    }
+
+    USUARIO_ADMIN_SEDE {
+        string usuarioAdminId FK
+        string sedeId FK
+        datetime asignadoAt
+    }
+
+    AUDITORIA_LOG {
+        string id PK
+        string usuarioAdminId FK
+        string accion
+        string entidad "opcional"
+        string entidadId "opcional"
+        json detalle "opcional"
+        string ipAddress "opcional"
+        datetime createdAt
+    }

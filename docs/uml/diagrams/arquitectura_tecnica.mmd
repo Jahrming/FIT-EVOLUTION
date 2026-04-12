@@ -1,0 +1,34 @@
+﻿sequenceDiagram
+    autonumber
+    actor U as Cliente (QR)
+    participant UI as Next.js 14 (App Router)
+    participant API as NestJS 10 (AppModule)
+    participant DB as Prisma/MySQL
+    participant SMTP as Gmail SMTP (Nodemailer)
+
+    U->>UI: Abre /aceptacion?sede=kennedy
+    UI->>API: GET /api/v1/sedes/kennedy
+    note right of API: SedesController -> SedesService -> Prisma.sede.findFirst()
+    API->>DB: Consulta sede activa + terminos version vigentes
+    DB-->>API: Datos legales + contenidoHtml
+    API-->>UI: JSON con sede y terminosActivos
+
+    UI->>API: GET /api/v1/session-token
+    note right of API: SessionTokenService genera UUID 1h y marca anti double submit
+    API-->>UI: sessionToken
+
+    U->>UI: Completa pasos (datos, terminos, consents, firma)
+    note over U,UI: React Hook Form + Zod validan y muestran errores UI
+
+    UI->>API: POST /api/v1/aceptaciones
+    note right of API: ValidationPipe + DTO + Throttler (5 req/min)
+    API->>API: Validar token, sede activa, terminos ACTIVO, correos
+    API->>DB: Inserta Aceptacion + logs de correo + hash documento
+    DB-->>API: transactionId y registro persistido
+
+    API->>SMTP: Nodemailer usa Gmail TLS (cliente + admin)
+    SMTP-->>API: messageId / estado
+    API-->>UI: 201 Created {transactionId, correoEnviado:true}
+    UI-->>U: Pantalla de exito + ID legal
+
+    note left of API: AppModule aplica Helmet, CORS, prefix api/v1 y PrismaModule
