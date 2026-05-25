@@ -44,7 +44,7 @@ sequenceDiagram
     participant DB as MySQL (Prisma)
     participant M as Correo (Gmail SMTP)
 
-    U->>F: Escanea QR (http://localhost:3000/aceptacion?sede=kennedy)
+    U->>F: Escanea QR (https://tudominio.com/aceptacion?sede=kennedy)
     F->>B: GET /api/v1/sedes/kennedy
     B->>DB: Consulta Sede + Términos Activos (v2)
     DB-->>B: Retorna Sede y HTML de Términos

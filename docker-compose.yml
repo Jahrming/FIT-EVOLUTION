@@ -2,17 +2,27 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
-    container_name: fitevolution360-postgres
+    image: mysql:8.0
+    container_name: fitevolution360-mysql
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: fitevolution360_dev
+      MYSQL_DATABASE: fitevolution360_dev
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+      TZ: America/Bogota
     ports:
-      - '5432:5432'
+      - '3306:3306'
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot']
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
-  postgres_data:
+  mysql_data:

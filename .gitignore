@@ -28,6 +28,3 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-
-# Prisma
-apps/api/prisma/migrations/

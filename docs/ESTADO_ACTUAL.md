@@ -11,7 +11,7 @@ Hemos cruzado la meta de las dos primeras fases críticas del MVP para **FIT EVO
 
 ### ✅ Hito 2: Arquitectura y Base de Datos (MySQL)
 - Se consolidó la estructura **Turborepo** (Next.js y NestJS).
-- El modelo `Prisma` fue migrado de Postgres a **MySQL**, permitiendo la integración nativa con XAMPP en el puerto `3307`.
+- El modelo `Prisma` fue migrado de Postgres a **MySQL**, permitiendo la integracion nativa con MySQL en el puerto `3306`.
 - Se configuró el comando dinámico `seed.ts` para inyectar automáticamente la "Sede Bucaramanga" y el texto legal oficial de los TÉRMINOS Y CONDICIONES (Versión 2).
 
 ### ✅ Hito 3: Mailing de Grado Producción

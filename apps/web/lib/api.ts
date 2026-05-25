@@ -1,8 +1,10 @@
 import axios from 'axios'
 import type { AceptacionPayload, AceptacionResponse, SedeInfo } from './schemas'
 
+const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || '/backend'
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: apiBaseURL,
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
 })

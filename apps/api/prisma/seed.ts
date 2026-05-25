@@ -17,14 +17,21 @@ async function main() {
   // 2. Sede Kennedy (Bucaramanga)
   const sedeKennedy = await prisma.sede.upsert({
     where: { slug: 'kennedy' },
-    update: {},
+    update: {
+      nombre: 'FIT EVOLUTION360 - Sede Kennedy',
+      ciudad: 'Bucaramanga',
+      direccion: 'Calle 18N # 10-74 Barrio Kennedy',
+      telefono: '601-1234567',
+      correoAdmin: 'nortefitevolution360@gmail.com',
+      activo: true,
+    },
     create: {
       slug: 'kennedy',
       nombre: 'FIT EVOLUTION360 - Sede Kennedy',
       ciudad: 'Bucaramanga',
       direccion: 'Calle 18N # 10-74 Barrio Kennedy',
       telefono: '601-1234567',
-      correoAdmin: 'jose2002rincon@gmail.com',
+      correoAdmin: 'nortefitevolution360@gmail.com',
       activo: true,
     },
   })

@@ -31,4 +31,5 @@ export class CreateAceptacionDto {
   @IsBoolean() aceptaTratamientoDatos: boolean
   @IsBoolean() declaraCondicionFisica: boolean
   @IsBoolean() autorizaUsoImagen: boolean
+  @IsOptional() @IsString() @MaxLength(500) condicionMedicaEspecial?: string
 }

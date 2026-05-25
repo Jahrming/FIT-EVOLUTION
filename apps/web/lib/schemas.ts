@@ -90,6 +90,7 @@ export interface AceptacionPayload {
   aceptaTratamientoDatos: boolean
   declaraCondicionFisica: boolean
   autorizaUsoImagen: boolean
+  condicionMedicaEspecial?: string
 }
 
 export interface AceptacionResponse {

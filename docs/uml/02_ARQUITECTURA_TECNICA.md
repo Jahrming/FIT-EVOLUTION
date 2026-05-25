@@ -3,7 +3,7 @@
 Este diagrama describe la conversacion real entre el frontend Next.js (app router) y la API NestJS levantada en `apps/api/src/main.ts`. Incluye los controladores `SedesController`, `SessionTokenController`, `AceptacionController` y la cadena Prisma/MySQL + Gmail SMTP.
 
 ## Resumen tecnico
-- `apps/web/lib/api.ts` centraliza las llamadas HTTP (sedes, session-token, aceptaciones) contra `NEXT_PUBLIC_API_URL`.
+- `apps/web/lib/api.ts` centraliza las llamadas HTTP (sedes, session-token, aceptaciones) contra `NEXT_PUBLIC_API_BASE_URL`, normalmente `/backend`.
 - `AppModule` aplica `helmet`, CORS cerrado al dominio del frontend y `ValidationPipe` global con sanitizacion de DTOs.
 - El Throttler limita los formularios a 5 solicitudes por minuto; `SessionTokenService` genera UUID de 1 hora y marca consumo.
 - `AceptacionService` valida sede/terminos, calcula `documentoHashAceptado`, crea logs en `correos_log` y delega a `CorreoService`.

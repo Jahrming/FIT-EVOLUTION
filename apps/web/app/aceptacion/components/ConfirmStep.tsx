@@ -14,8 +14,8 @@ interface Props {
 }
 
 const TIPO_LABEL: Record<string, string> = {
-  CC: 'Cédula de Ciudadanía',
-  CE: 'Cédula de Extranjería',
+  CC: 'Cedula de Ciudadania',
+  CE: 'Cedula de Extranjeria',
   PA: 'Pasaporte',
   TI: 'Tarjeta de Identidad',
 }
@@ -44,81 +44,105 @@ export default function ConfirmStep({
       }),
     },
     { label: 'Celular', value: formulario.telefono },
-    { label: 'Correo electrónico', value: formulario.correoElectronico },
+    { label: 'Correo electronico', value: formulario.correoElectronico },
     ...(formulario.contactoEmergenciaNombre
-      ? [{ label: 'Contacto emergencia', value: `${formulario.contactoEmergenciaNombre} — ${formulario.contactoEmergenciaTelefono || ''}` }]
+      ? [
+          {
+            label: 'Contacto emergencia',
+            value: `${formulario.contactoEmergenciaNombre} — ${formulario.contactoEmergenciaTelefono || ''}`,
+          },
+        ]
       : []),
-    { label: 'Versión T&C aceptada', value: `v${terminosVersion}` },
+    { label: 'Version T&C aceptada', value: `v${terminosVersion}` },
   ]
 
   const consentRows = [
-    { label: 'Acepta T&C', value: consents.aceptaTerminos },
-    { label: 'Tratamiento de datos', value: consents.aceptaTratamientoDatos },
-    { label: 'Condición física apta', value: consents.declaraCondicionFisica },
-    { label: 'Uso de imagen', value: consents.autorizaUsoImagen },
+    { label: 'Acepta T&C', value: consents.aceptaTerminos, text: consents.aceptaTerminos ? '✓ Si' : '✗ No' },
+    {
+      label: 'Tratamiento de datos',
+      value: consents.aceptaTratamientoDatos,
+      text: consents.aceptaTratamientoDatos ? '✓ Si' : '✗ No',
+    },
+    {
+      label: 'Condicion fisica apta',
+      value: consents.declaraCondicionFisica,
+      text: consents.declaraCondicionFisica ? '✓ Si' : '✗ No',
+    },
+    {
+      label: 'Uso de imagen',
+      value: consents.autorizaUsoImagen,
+      text: consents.autorizaUsoImagen ? '✓ Si' : '✗ No',
+    },
   ]
 
   return (
     <div className="animate-slide-up space-y-5">
       <div>
         <h2 className="text-xl font-bold text-white">Confirma tu registro</h2>
-        <p className="text-gray-400 text-sm mt-1">
-          Revisa tu información antes de enviar. Una copia llegará a tu correo.
+        <p className="mt-1 text-sm text-gray-400">
+          Revisa tu informacion antes de enviar. Una copia llegara a tu correo.
         </p>
       </div>
 
-      {/* Data summary */}
-      <div className="bg-dark-900 rounded-xl border border-dark-800 divide-y divide-dark-800">
+      <div className="divide-y divide-dark-800 rounded-xl border border-dark-800 bg-dark-900">
         {rows.map((row) => (
           <div key={row.label} className="flex justify-between gap-3 px-4 py-3">
-            <span className="text-xs text-gray-500 shrink-0">{row.label}</span>
-            <span className="text-xs text-white text-right font-medium">{row.value}</span>
+            <span className="shrink-0 text-xs text-gray-500">{row.label}</span>
+            <span className="text-right text-xs font-medium text-white">{row.value}</span>
           </div>
         ))}
       </div>
 
-      {/* Consents summary */}
-      <div className="bg-dark-900 rounded-xl border border-dark-800 divide-y divide-dark-800">
+      <div className="divide-y divide-dark-800 rounded-xl border border-dark-800 bg-dark-900">
         {consentRows.map((row) => (
           <div key={row.label} className="flex items-center justify-between px-4 py-3">
             <span className="text-xs text-gray-500">{row.label}</span>
             <span className={`text-xs font-bold ${row.value ? 'text-brand-400' : 'text-gray-600'}`}>
-              {row.value ? '✓ Sí' : '✗ No'}
+              {row.text}
             </span>
           </div>
         ))}
+        {!consents.declaraCondicionFisica && consents.condicionMedicaEspecial && (
+          <div className="px-4 py-3">
+            <p className="text-xs text-gray-500">Condicion medica especial</p>
+            <p className="mt-1 text-xs font-medium text-white">
+              {consents.condicionMedicaEspecial}
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Signature preview */}
       <div>
-        <p className="text-xs text-gray-500 mb-2">Tu firma</p>
-        <div className="bg-white rounded-xl p-3 border border-dark-700">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={firmaBase64}
-            alt="Tu firma digital"
-            className="max-h-24 mx-auto object-contain"
-          />
+        <p className="mb-2 text-xs text-gray-500">Tu firma</p>
+        <div className="rounded-xl border border-dark-700 bg-white p-3">
+          {firmaBase64 ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={firmaBase64}
+              alt="Tu firma digital"
+              className="mx-auto max-h-24 object-contain"
+            />
+          ) : (
+            <p className="text-center text-xs text-gray-500">
+              No se registro firma en este envio.
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Warning */}
-      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
-        <p className="text-xs text-amber-300/80 leading-relaxed">
-          ⚠️ Al confirmar, tu aceptación quedará registrada de forma permanente junto con
-          tus datos, IP, dispositivo y firma digital. Esta acción no puede deshacerse.
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+        <p className="text-xs leading-relaxed text-amber-300/80">
+          ⚠️ Al confirmar, tu aceptacion quedara registrada de forma permanente junto con
+          tus datos, IP, dispositivo y firma digital. Esta accion no puede deshacerse.
         </p>
       </div>
 
-      {/* Buttons */}
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="flex-1 py-3.5 border border-dark-700 text-gray-400 hover:text-white
-                     hover:border-dark-600 rounded-xl text-sm font-medium transition-colors
-                     disabled:opacity-50"
+          className="flex-1 rounded-xl border border-dark-700 py-3.5 text-sm font-medium text-gray-400 transition-colors hover:border-dark-600 hover:text-white disabled:opacity-50"
         >
           ← Volver
         </button>
@@ -126,12 +150,11 @@ export default function ConfirmStep({
           type="button"
           onClick={onConfirm}
           disabled={isLoading}
-          className="flex-grow py-3.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-50
-                     text-dark-950 font-bold rounded-xl flex items-center justify-center gap-2"
+          className="flex-grow flex items-center justify-center gap-2 rounded-xl bg-brand-500 py-3.5 font-bold text-dark-950 disabled:opacity-50 hover:bg-brand-400"
         >
           {isLoading ? (
             <>
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>

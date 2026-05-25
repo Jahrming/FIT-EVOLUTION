@@ -1,64 +1,92 @@
-<div align="center">
-  <img src="./apps/web/public/logo.png" alt="FIT EVOLUTION360 Logo" width="120" />
-</div>
+# FIT EVOLUTION360
 
-<h1 align="center">FIT EVOLUTION360 - Plataforma de Aceptación Digital</h1>
+Plataforma de aceptacion digital para sedes de gimnasio.
 
-<div align="center">
-  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white">
-  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white">
-  <img alt="NestJS" src="https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white">
-  <img alt="Prisma" src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white">
-  <img alt="MySQL" src="https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white">
-</div>
+## Stack
 
-<br/>
+- `apps/web`: Next.js 14
+- `apps/api`: NestJS 10
+- Base de datos: MySQL + Prisma
+- Correo: Gmail SMTP via Nodemailer
 
-Este repositorio contiene la Plataforma de Registro, Aceptación de Términos Digitales y Notificaciones Automáticas para **FIT EVOLUTION360**. El ecosistema fue construido usando una arquitectura monorepo de alto rendimiento accionada por **Turborepo**.
+## Entornos
 
-## 📖 Documentación Principal (Docs)
+Usa variables separadas por app:
 
-Hemos creado una serie de manuales detallados ubicados en la carpeta `docs/` para garantizar la sostenibilidad y escalabilidad del proyecto:
+- `apps/web/.env.local`
+- `apps/api/.env`
 
-1. 🏛️ **[Arquitectura y Diagramas UML](./docs/ARQUITECTURA_Y_DIAGRAMAS.md)**: Flujos del usuario, Diagrama E-R de la Base de Datos MySQL y Comunicación Frontend-Backend.
-2. 🛠️ **[Guía Operativa y Mantenimiento Manual](./docs/GUIA_OPERATIVA.md)**: Cómo modificar el correo de los administradores, los colores de la marca, los textos legales, y las credenciales de Gmail.
-3. 📋 **[Estado Actual del Proyecto](./docs/ESTADO_ACTUAL.md)**: Registro del 100% de la funcionalidad entregada en la Fase 1 y 2.
+Referencias:
 
----
+- `apps/web/.env.example`
+- `apps/api/.env.example`
+- `.env.example`
 
-## 🚀 Tecnologías Core
+El frontend usa `NEXT_PUBLIC_API_BASE_URL=/backend` y Next.js reenvia al backend real con `API_PROXY_TARGET`. Esto evita problemas cuando el formulario se abre desde celular o desde otro host.
 
-### Frontend (User Interface)
-- **Next.js 14 (App Router)**: Framework React para Server-Side Rendering rápido.
-- **Tailwind CSS v3**: Identidad visual *mobile-first* personalizada (Amarillo/Negro).
-- **React Hook Form + Zod**: Validación estricta de formularios y seguridad.
-- **React Signature Canvas**: Captura del panel de firma digital biométrica (Opcional).
+## Arranque local
 
-### Backend (Logic & Mailing)
-- **NestJS 10**: Arquitectura hexagonal y basada en controladores.
-- **Prisma ORM**: Modelado estricto e inyección de datos para MySQL.
-- **Nodemailer (Gmail SMTP)**: Servicio de envío de recibos legales instantáneos al cliente y copias ocultas a la administración.
-
----
-
-## ⚡ Comandos Rápidos
-
-Si ya tienes las dependencias instaladas y tu XAMPP/MySQL configurado, puedes encender toda la plataforma simultáneamente con un solo comando:
+1. Instala dependencias:
 
 ```bash
-# Iniciar Frontend (Puerto 3000) y Backend (Puerto 3001) paralelamente
-npm run dev
+npm install
+```
 
-# Regenerar cliente de base de datos
+2. Levanta MySQL con Docker o usa tu servidor MySQL:
+
+```bash
+npm run db:up
+```
+
+3. Configura:
+
+- `apps/api/.env`
+- `apps/web/.env.local`
+
+4. Prepara la base:
+
+```bash
 cd apps/api
 npx prisma generate
 npx prisma db push
 npx prisma db seed
+cd ../..
 ```
 
-Para ver la guía de instalación desde cero en un computador nuevo, revisa el paso 4 de la [Guía Operativa](./docs/GUIA_OPERATIVA.md).
+5. Inicia el monorepo:
 
----
+```bash
+npm run dev
+```
 
-## 🔒 Privacidad y Legal
-Toda la captura de información de clientes, el almacenamiento de metadatos (IP, User Agent) y la trazabilidad de aceptaciones (Hashes SHA-256) cumple rigurosamente con la **Ley 1581 de 2012** (Colombia) sobre Protección de Datos Personales.
+## Variables importantes
+
+### Frontend
+
+- `NEXT_PUBLIC_API_BASE_URL=/backend`
+- `API_PROXY_TARGET=http://127.0.0.1:3001`
+- `NEXT_PUBLIC_APP_URL=http://localhost:3000`
+
+### Backend
+
+- `PORT=3001`
+- `DATABASE_URL=mysql://...`
+- `CORS_ORIGIN=http://localhost:3000`
+- `GMAIL_USER=...`
+- `GMAIL_APP_PASSWORD=...`
+
+`CORS_ORIGIN` acepta varios dominios separados por coma.
+
+## Despliegue
+
+Documentacion relevante:
+
+- [docs/GUIA_OPERATIVA.md](./docs/GUIA_OPERATIVA.md)
+- [docs/DESPLIEGUE_HOSTINGER.md](./docs/DESPLIEGUE_HOSTINGER.md)
+
+## Fuente de verdad tecnica
+
+- Base de datos: `apps/api/prisma/schema.prisma`
+- Seed: `apps/api/prisma/seed.ts`
+- Proxy frontend: `apps/web/next.config.js`
+- Cliente HTTP: `apps/web/lib/api.ts`

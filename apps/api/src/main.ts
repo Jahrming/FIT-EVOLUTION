@@ -12,32 +12,40 @@ async function bootstrap() {
   const config = app.get(ConfigService)
   const corsOrigin = config.get<string>('CORS_ORIGIN') || 'http://localhost:3000'
   const port = config.get<number>('PORT') || 3001
+  const allowedOrigins = corsOrigin
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 
-  // Security headers
   app.use(helmet())
+  app.getHttpAdapter().getInstance().set('trust proxy', 1)
 
-  // CORS — only allow frontend origin
   app.enableCors({
-    origin: corsOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true)
+        return
+      }
+
+      callback(new Error(`Origin not allowed by CORS: ${origin}`), false)
+    },
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   })
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,          // strip unknown fields
+      whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),
   )
 
-  // Global API prefix
   app.setGlobalPrefix('api/v1')
 
   await app.listen(port)
-  console.log(`🚀 API running on http://localhost:${port}/api/v1`)
+  console.log(`API running on http://localhost:${port}/api/v1`)
 }
 
 bootstrap()
