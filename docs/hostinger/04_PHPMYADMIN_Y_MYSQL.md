@@ -1,35 +1,66 @@
 # phpMyAdmin y MySQL
 
+Esta guia explica como revisar la base de datos en Hostinger sin dañar el proyecto.
+
 ## 1. Compatibilidad
 
-Si, este proyecto es compatible con phpMyAdmin porque:
+Si, este proyecto es compatible con phpMyAdmin.
 
-- Prisma usa `provider = "mysql"` en `apps/api/prisma/schema.prisma`
-- phpMyAdmin administra bases MySQL y MariaDB
+Motivo:
 
-En otras palabras:
+- Prisma usa `provider = "mysql"` en [apps/web/prisma/schema.prisma](/D:/Jose/UDI/PRACTICAS/fit-evolution360/apps/web/prisma/schema.prisma)
+- Hostinger ofrece MySQL
+- phpMyAdmin sirve para ver y administrar esa base desde hPanel
 
-- Prisma crea las tablas
-- phpMyAdmin te permite verlas, consultarlas y revisar registros
+En resumen:
 
-## 2. Lo recomendado
+- Prisma crea y actualiza la estructura
+- phpMyAdmin te deja revisar si todo realmente se guardo
 
-### Usa phpMyAdmin para
+## 2. Para que usar phpMyAdmin
+
+Usalo para:
 
 - confirmar que la base existe
 - confirmar que las tablas existen
-- revisar registros
+- revisar registros guardados
 - exportar respaldos
+- revisar correos log
+- revisar que `correo_admin` este correcto en `sedes`
 
-### Usa Prisma para
+## 3. Para que NO usar phpMyAdmin
 
-- crear el esquema
-- empujar cambios de tablas
-- sembrar datos iniciales
+No lo uses para:
 
-## 3. Tablas que deberias ver
+- renombrar tablas manualmente
+- cambiar tipos de columnas manualmente
+- borrar relaciones
+- alterar claves foraneas por tu cuenta
 
-Despues de `prisma db push` y `prisma db seed`, en phpMyAdmin deberias ver:
+Si haces eso, Prisma y la base pueden quedar desalineados.
+
+## 4. Como entrar a phpMyAdmin en Hostinger
+
+En Hostinger:
+
+1. entra a `Websites`
+2. entra al sitio
+3. `Dashboard`
+4. busca `Databases Management`
+5. ubica tu base
+6. pulsa `Enter phpMyAdmin`
+
+## 5. Tablas que deberias ver
+
+Despues de correr:
+
+```bash
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+```
+
+deberias ver estas tablas:
 
 - `sedes`
 - `terminos_versiones`
@@ -41,32 +72,47 @@ Despues de `prisma db push` y `prisma db seed`, en phpMyAdmin deberias ver:
 - `usuarios_admin_sedes`
 - `auditoria_logs`
 
-## 4. Qué NO debes hacer en phpMyAdmin
+## 6. Revision minima despues del seed
 
-No recomiendo:
+En phpMyAdmin revisa:
 
-- borrar tablas manualmente
-- cambiar nombres de columnas
-- alterar relaciones
-- cambiar tipos de datos manualmente
+1. tabla `sedes`
+2. tabla `terminos_versiones`
 
-Si haces eso, Prisma puede quedar desalineado con la base.
+Confirma:
 
-## 5. Qué SI puedes hacer sin problema
+- existe la sede `kennedy`
+- existe una version activa de terminos
+- el correo admin apunta a `nortefitevolution360@gmail.com`
 
-- ver los registros
-- exportar la base
-- revisar correos guardados
-- revisar aceptaciones
-- revisar que `correo_admin` este correcto en `sedes`
+## 7. Revision minima despues de una prueba real
 
-## 6. Sobre MySQL y Hostinger
+Despues de enviar un registro desde la web:
 
-Prisma documenta oficialmente que el conector `mysql` funciona con MySQL y MariaDB.
+1. abre tabla `aceptaciones`
+2. confirma que existe una fila nueva
+3. abre tabla `correos_log`
+4. confirma que existan logs del usuario y de administracion
 
-Fuente oficial Prisma:
+## 8. Si no aparece informacion nueva
 
-- https://docs.prisma.io/docs/v6/orm/overview/databases/mysql
-- https://www.prisma.io/docs/orm/overview/databases/mysql
+Revisa en este orden:
 
-Eso significa que, si Hostinger te da MySQL o MariaDB administrado, el proyecto sigue siendo valido con el conector actual.
+1. `DATABASE_URL`
+2. que la base correcta este asignada al sitio en Hostinger
+3. que el `prisma db push` se ejecuto contra la base remota
+4. que la app desplegada use esas mismas variables
+
+## 9. Nota sobre Hostinger y MySQL
+
+Segun la documentacion oficial consultada el `25 de mayo de 2026`:
+
+- Hostinger ofrece MySQL en estos planes compartidos o gestionados
+- la conexion remota usa puerto `3306`
+- la gestion desde panel se hace por `Databases Management` y `phpMyAdmin`
+
+Fuentes oficiales:
+
+- https://www.hostinger.com/support/connecting-a-hostinger-mysql-database-to-a-node-js-application/
+- https://www.hostinger.com/support/1583546-how-to-set-up-remote-mysql-access-in-hostinger/
+- https://www.hostinger.com/support/1864454-how-to-manage-mysql-databases-in-hostinger/

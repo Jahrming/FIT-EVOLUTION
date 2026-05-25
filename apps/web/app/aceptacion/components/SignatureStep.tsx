@@ -16,8 +16,7 @@ interface Props {
  * Soporta eventos táctiles (dedo) o cursor (mouse).
  */
 export default function SignatureStep({ onNext, onBack }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sigRef = useRef<any>(null)
+  const sigRef = useRef<SignatureCanvas | null>(null)
   const [isEmpty, setIsEmpty] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)

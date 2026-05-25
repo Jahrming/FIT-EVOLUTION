@@ -109,9 +109,10 @@ export default function FormStep({ defaultValues, onNext, onBack }: Props) {
         <input
           {...register('fechaNacimiento')}
           type="date"
-          max={new Date(Date.now() - 16 * 365.25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+          max={new Date(Date.now() - 13 * 365.25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
           className={clsx('form-input', errors.fechaNacimiento && 'form-input-error')}
         />
+        <p className="mt-1 text-xs text-gray-500">Edad minima permitida: 13 anos.</p>
         {errors.fechaNacimiento && (
           <p className="form-error">{errors.fechaNacimiento.message}</p>
         )}

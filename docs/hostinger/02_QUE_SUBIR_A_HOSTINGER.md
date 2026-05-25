@@ -1,79 +1,99 @@
 # Que Subir A Hostinger
 
-## 1. Backend
+Esta guia evita el error mas comun: subir el proyecto equivocado.
 
-Sube solo el contenido de:
+## 1. Que SI debes subir
 
-- `apps/api`
-
-### Debe incluir
-
-- `package.json`
-- `nest-cli.json`
-- `tsconfig.json`
-- `src`
-- `prisma`
-
-### No debe incluir
-
-- `node_modules`
-- `dist`
-- `.env`
-- la carpeta raiz del monorepo
-
-## 2. Frontend
-
-Sube solo el contenido de:
+Debes subir solo el contenido de:
 
 - `apps/web`
 
-### Debe incluir
+No debes subir:
+
+- la raiz completa del monorepo
+- `apps/api`
+- `node_modules`
+- `.next`
+- `.env.local`
+
+## 2. Que archivos deben existir dentro de lo que subes
+
+Como minimo, dentro del paquete final deben quedar visibles:
 
 - `package.json`
 - `next.config.js`
 - `app`
+- `components`
 - `lib`
+- `prisma`
+- `public`
+- `styles`
 - `tailwind.config.ts`
 - `postcss.config.js`
 - `tsconfig.json`
+- `.eslintrc.json`
 
-### No debe incluir
+## 3. Metodo recomendado si usas GitHub
 
-- `node_modules`
-- `.next`
-- `.env.local`
-- la carpeta raiz del monorepo
+Si Hostinger despliega desde GitHub:
 
-## 3. Como comprimirlo sin equivocarte
+- el repositorio puede ser el monorepo completo
+- pero la configuracion de despliegue debe apuntar al proyecto `apps/web`
 
-### Backend
+Antes de pulsar deploy, confirma que la app seleccionada es la del frontend actual con backend interno, no `apps/api`.
 
-1. entra a `apps/api`
-2. selecciona todo el contenido dentro de esa carpeta
-3. comprime eso en un zip
-4. nombre sugerido: `backend-hostinger.zip`
+## 4. Metodo recomendado si usas ZIP
 
-### Frontend
+Si Hostinger despliega por ZIP:
 
 1. entra a `apps/web`
 2. selecciona todo el contenido dentro de esa carpeta
-3. comprime eso en un zip
-4. nombre sugerido: `frontend-hostinger.zip`
+3. comprime solo ese contenido
+4. nombre sugerido del archivo: `fit-evolution360-hostinger.zip`
 
-## 4. Error comun
+## 5. Como comprobar que el ZIP esta bien hecho
 
-No comprimas la carpeta `apps/api` completa dentro de otra carpeta.
+Abre el ZIP en tu computador.
 
-El zip debe abrir y mostrar directo:
-
-- `package.json`
-- `src`
-- `prisma`
-
-Lo mismo para frontend:
+Si esta correcto, al abrirlo debes ver directamente:
 
 - `package.json`
 - `app`
 - `lib`
+- `prisma`
 
-Si al abrir el zip primero ves otra carpeta intermedia, vuelve a comprimir.
+Si al abrirlo primero ves una carpeta intermedia como:
+
+- `apps`
+- `web`
+- `fit-evolution360`
+
+entonces el ZIP esta mal hecho y Hostinger puede detectar mal la app.
+
+## 6. Que NO debes incluir nunca
+
+No metas dentro del ZIP:
+
+- `node_modules`
+- `.next`
+- `dist`
+- `.turbo`
+- `.env`
+- `.env.local`
+- archivos temporales del sistema
+
+## 7. Senales de que subiste el paquete incorrecto
+
+Si en Hostinger ves alguno de estos sintomas, casi siempre subiste mal el proyecto:
+
+- no detecta `Next.js`
+- no encuentra `package.json`
+- no corre `npm run build`
+- intenta arrancar otra app distinta
+- te pide un `entry file` raro
+
+## 8. Regla simple
+
+Para este proyecto, recuerda esta regla:
+
+- si estas desplegando en Hostinger, casi siempre solo necesitas `apps/web`

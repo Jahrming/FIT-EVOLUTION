@@ -1,15 +1,18 @@
 /** @type {import('next').NextConfig} */
 const apiProxyTarget =
-  process.env.API_PROXY_TARGET ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'http://127.0.0.1:3001'
+  process.env.API_PROXY_TARGET || process.env.NEXT_PUBLIC_API_URL || ''
 
 const nextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ['@prisma/client', 'nodemailer'],
   images: {
     domains: ['localhost'],
   },
   async rewrites() {
+    if (!apiProxyTarget) {
+      return []
+    }
+
     return [
       {
         source: '/backend/:path*',
