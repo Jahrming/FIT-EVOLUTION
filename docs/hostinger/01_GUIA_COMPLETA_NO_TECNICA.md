@@ -1,223 +1,146 @@
 # Guia Completa No Tecnica Para Hostinger
 
-Fecha de referencia: `25 de mayo de 2026`
+Esta es la guia vigente para subir el proyecto manualmente a Hostinger usando una sola carpeta y una sola app Node.js.
 
-Esta guia esta escrita para que una persona no tecnica pueda desplegar el proyecto siguiendo pasos concretos y verificables.
+Esta guia asume esto:
+
+- la base de datos MySQL ya existe
+- `DATABASE_URL` ya lo tienes
+- el correo Gmail ya esta listo
+- vas a subir archivos manualmente por `FTP` o `File Manager`
 
 ## 1. Que vas a montar exactamente
 
-Con la arquitectura actual del proyecto, en Hostinger vas a montar solo esto:
+Vas a montar solo esto:
 
-1. una base de datos MySQL
-2. una sola app Node.js con el contenido de `apps/web`
+1. una sola app Node.js con el contenido de `apps/web`
+2. una sola carpeta de codigo en Hostinger
+3. una sola base MySQL ya existente
 
-No necesitas:
+No vas a montar:
 
-- una app separada para backend
+- `apps/api`
 - un subdominio `api`
-- desplegar `apps/api`
+- dos apps separadas
+- un backend aparte
 
 ## 2. Como debe quedar al final
 
-Al terminar correctamente, debe quedar asi:
+Cuando todo quede bien, debe pasar esto:
 
 - `https://tudominio.com` abre la app
-- `https://tudominio.com/backend/api/v1/sedes/kennedy` responde JSON
-- la base MySQL existe en Hostinger
-- phpMyAdmin muestra las tablas
-- el formulario guarda registros
-- se envian correos al usuario y a `nortefitevolution360@gmail.com`
+- `https://tudominio.com/backend/api/v1/sedes/kennedy` devuelve JSON
+- `https://tudominio.com/backend/api/v1/session-token` devuelve un token
+- el formulario guarda en la base de datos que ya tienes publicada
+- se envian correos al usuario y al correo administrativo
 
 ## 3. Que necesitas antes de empezar
 
-Debes tener listo lo siguiente:
+Debes tener:
 
-1. un plan Hostinger compatible con Node.js Web Apps
+1. un plan Hostinger con `Node.js Web Apps`
 2. tu dominio ya apuntando a Hostinger
-3. acceso al proyecto en tu computador
-4. `Node.js 20.x` instalado en tu computador
-5. acceso al correo `nortefitevolution360@gmail.com`
-6. la clave de aplicacion de Gmail de ese correo
+3. acceso FTP o acceso al `File Manager`
+4. acceso al panel de la app Node.js en Hostinger
+5. `Node.js 20.x` en Hostinger
+6. acceso a este proyecto en tu computador
+7. los datos reales de `DATABASE_URL`
+8. `GMAIL_USER` y `GMAIL_APP_PASSWORD`
 
-## 4. Plan recomendado en Hostinger
+## 4. Idea central del despliegue
 
-Segun la documentacion oficial de Hostinger revisada el `25 de mayo de 2026`, Node.js Web Apps esta disponible en:
+La regla simple es esta:
 
-- `Business Web Hosting`
-- `Cloud Startup`
-- `Cloud Professional`
-- `Cloud Enterprise`
-- `Cloud Enterprise Plus`
+- en Hostinger existe una carpeta raiz para tu app Node.js
+- dentro de esa carpeta debes dejar directamente el contenido de `apps/web`
+- no debes meter una carpeta extra llamada `apps`
+- no debes meter una carpeta extra llamada `web`
 
-Si tu plan no es uno de esos, primero debes subir de plan.
+Cuando abras la carpeta final en Hostinger, debes ver directamente:
 
-## 5. Paso 1. Crear la base de datos MySQL
+- `package.json`
+- `next.config.js`
+- `app`
+- `lib`
+- `prisma`
 
-Entra a Hostinger y sigue esta ruta:
+## 5. Paso 1. Revisar si realmente necesitas tocar la base de datos
 
-1. `Websites`
-2. elige tu sitio
-3. `Dashboard`
-4. busca `MySQL Databases`
-5. crea una base nueva
+Como tu base ya esta publicada y configurada, normalmente para subir cambios de frontend o logica no debes tocar Prisma.
 
-Guarda exactamente estos datos:
+Haz esto:
 
-- `Database name`
-- `Database username`
-- `Database password`
-- `Database host`
-- puerto `3306`
+- si solo cambiaste UI, formularios, textos, paginas o logica sin cambiar `prisma/schema.prisma`, no corras `db push`
+- si cambiaste `prisma/schema.prisma`, entonces si debes actualizar la base antes o durante el despliegue
+- si cambiaste `prisma/seed.ts`, solo corre seed si realmente necesitas reinsertar o actualizar datos base
 
-No sigas al siguiente paso si no guardaste esos 5 datos.
+Para el cambio actual de carga de sede en `localhost`, no necesitas cambios de base de datos.
 
-## 6. Paso 2. Habilitar Remote MySQL
+## 6. Paso 2. Preparar la carpeta correcta en tu computador
 
-Esto es para poder crear tablas desde tu computador.
+La carpeta que vas a subir es:
 
-En Hostinger:
+- `apps/web`
 
-1. abre el `Dashboard` del sitio
-2. busca `Remote MySQL`
-3. pulsa `Create`
-4. en `IP`, pon la IP publica de tu computador
-5. en `Database`, selecciona tu base
-6. pulsa `Create`
+No subas la raiz completa del monorepo.
 
-Notas:
+Antes de subir, revisa que en `apps/web` existan como minimo estos archivos y carpetas:
 
-- si no sabes tu IP publica, buscala en Google con `what is my ip`
-- Hostinger tambien permite `Any Host`, pero no es lo ideal para produccion permanente
+- `package.json`
+- `next.config.js`
+- `app`
+- `lib`
+- `prisma`
+- `postcss.config.js`
+- `tailwind.config.ts`
+- `tsconfig.json`
 
-## 7. Paso 3. Crear el archivo local de variables
+## 7. Paso 3. Confirmar que NO vas a subir basura
 
-En tu computador, dentro del proyecto, crea o edita:
+No subas:
 
-- `apps/web/.env.local`
+- `node_modules`
+- `.next`
+- `.env`
+- `.env.local`
+- `tsconfig.tsbuildinfo`
+- archivos temporales de Windows
 
-Contenido:
+La idea es subir codigo fuente, no artefactos de compilacion ni secretos locales.
 
-```env
-NEXT_PUBLIC_API_BASE_URL=/backend
-NEXT_PUBLIC_APP_URL=https://tudominio.com
-DATABASE_URL=mysql://USUARIO_DB:PASSWORD_DB@HOST_DB:3306/NOMBRE_DB
-GMAIL_USER=nortefitevolution360@gmail.com
-GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
-```
-
-Reemplaza:
-
-- `USUARIO_DB`
-- `PASSWORD_DB`
-- `HOST_DB`
-- `NOMBRE_DB`
-- `TU_CLAVE_DE_APLICACION`
-
-## 8. Paso 4. Crear las tablas y datos iniciales
-
-Abre terminal en la raiz del proyecto y ejecuta:
-
-```bash
-cd apps/web
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-cd ../..
-```
-
-Que debe pasar:
-
-- `prisma generate` prepara el cliente Prisma
-- `prisma db push` crea o actualiza las tablas
-- `prisma db seed` crea los datos iniciales, como sede y terminos
-
-Si aqui falla algo, no subas la app todavia.
-
-## 9. Paso 5. Revisar la base con phpMyAdmin
-
-En Hostinger:
-
-1. vuelve a `Websites`
-2. entra al sitio
-3. `Dashboard`
-4. busca `Databases Management`
-5. entra a tu base
-6. pulsa `Enter phpMyAdmin`
-
-Verifica que existan al menos estas tablas:
-
-- `sedes`
-- `terminos_versiones`
-- `sesion_tokens`
-- `aceptaciones`
-- `correos_log`
-- `roles`
-- `usuarios_admin`
-- `usuarios_admin_sedes`
-- `auditoria_logs`
-
-Si esas tablas no existen, no pases al despliegue.
-
-## 10. Paso 6. Elegir metodo de subida
-
-Hostinger soporta 2 formas de despliegue para Node.js Web Apps:
-
-1. `GitHub`
-2. `ZIP`
-
-Recomendacion:
-
-- usa `GitHub` si tu proyecto ya vive en GitHub y quieres redeploy facil
-- usa `ZIP` si no manejas GitHub o quieres subir un paquete manual
-
-Ambos metodos sirven para esta app.
-
-## 11. Paso 7A. Subida recomendada por GitHub
+## 8. Paso 4. Entrar a la app Node.js en Hostinger
 
 En Hostinger:
 
 1. entra a `Websites`
-2. pulsa `Add Website`
-3. elige `Node.js Apps`
-4. elige `Import Git Repository`
-5. autoriza GitHub
-6. elige el repositorio correcto
-7. elige la rama correcta
+2. abre el sitio correcto
+3. entra a la seccion de `Node.js`
+4. confirma que la app usa `Node 20.x`
+5. identifica la carpeta raiz asignada a esa app
 
-Cuando Hostinger te muestre configuracion:
+Esa carpeta raiz es la unica carpeta donde vas a trabajar.
 
-- confirma que el proyecto a desplegar es `apps/web`
-- selecciona `Node 20.x`
-- revisa variables de entorno antes de desplegar
+## 9. Paso 5. Subir los archivos por FTP o File Manager
+
+Conecta por `FTP` o abre el `File Manager`.
 
 Luego:
 
-1. agrega las variables de entorno del archivo `03_VARIABLES_EXACTAS.md`
-2. revisa comandos de build y start
-3. pulsa `Deploy`
+1. entra a la carpeta raiz de la app Node.js
+2. sube ahi directamente el contenido de `apps/web`
+3. reemplaza los archivos existentes cuando corresponda
 
-## 12. Paso 7B. Subida por ZIP
+Importante:
 
-Si no vas a usar GitHub:
+- no subas una carpeta contenedora extra
+- no debe quedar algo como `.../apps/web/package.json`
+- debe quedar algo como `.../package.json`
 
-1. sigue `docs/hostinger/02_QUE_SUBIR_A_HOSTINGER.md`
-2. crea un ZIP con el contenido de `apps/web`
-3. en Hostinger entra a `Websites`
-4. pulsa `Add Website`
-5. elige `Node.js Apps`
-6. elige `Upload your website files`
-7. sube el ZIP
+Si al terminar ves `package.json` dentro de la carpeta final, la subida quedo bien estructurada.
 
-Cuando Hostinger termine de analizar el ZIP:
+## 10. Paso 6. Configurar variables de entorno en Hostinger
 
-1. selecciona `Node 20.x`
-2. revisa o completa variables de entorno
-3. revisa comandos
-4. pulsa `Deploy`
-
-## 13. Paso 8. Variables de entorno en Hostinger
-
-En la configuracion de la app Node.js agrega:
+En la app Node.js de Hostinger agrega exactamente estas variables:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=/backend
@@ -227,16 +150,17 @@ GMAIL_USER=nortefitevolution360@gmail.com
 GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
 ```
 
-Importante:
+Notas:
 
-- no uses `localhost`
-- no uses `127.0.0.1`
-- no pongas comillas si Hostinger no las necesita
-- la clave de Gmail debe ir sin espacios extra
+- no pongas `API_PROXY_TARGET`
+- no pongas `localhost`
+- no pongas `127.0.0.1`
+- no subas estas variables en un archivo `.env.local`
+- ponlas en el panel de Hostinger
 
-## 14. Paso 9. Comandos correctos en Hostinger
+## 11. Paso 7. Poner los comandos correctos
 
-Usa estos comandos:
+En Hostinger revisa que la app tenga estos comandos:
 
 ### Install command
 
@@ -256,25 +180,32 @@ npm install && npx prisma generate && npm run build
 npm run start
 ```
 
-La app ya tiene en [apps/web/package.json](/D:/Jose/UDI/PRACTICAS/fit-evolution360/apps/web/package.json):
+No agregues `apps/web` a esos comandos porque ya estas subiendo directamente el contenido de esa carpeta.
 
-- `postinstall: prisma generate`
-- `build: next build`
-- `start: next start -H 0.0.0.0`
-- `engines.node: 20.x`
+## 12. Paso 8. Si hubo cambios de base de datos, aplicarlos
 
-## 15. Paso 10. Esperar el deploy y revisar el dashboard
+Este paso es solo cuando cambiaste el esquema Prisma.
 
-Cuando pulses `Deploy`, espera a que Hostinger:
+Opciones:
 
-1. suba o clone el proyecto
-2. instale dependencias
-3. ejecute build
-4. inicie la app
+1. correr `npx prisma db push` desde tu computador apuntando a la base remota
+2. o correrlo desde la terminal de Hostinger si tu plan la ofrece
 
-No sigas si ves errores rojos en logs.
+Si no cambiaste `prisma/schema.prisma`, omite este paso.
 
-## 16. Paso 11. Probar primero la parte tecnica
+## 13. Paso 9. Ejecutar build y reiniciar
+
+Despues de subir archivos por FTP:
+
+1. corre el `install command` si Hostinger no lo ejecuta solo
+2. corre el `build command`
+3. reinicia la app o pulsa `Deploy` o `Restart`
+
+Regla importante:
+
+- subir por FTP sin rebuild ni restart puede dejar viva la version anterior
+
+## 14. Paso 10. Probar primero la parte tecnica
 
 Abre estas dos URLs:
 
@@ -283,75 +214,73 @@ Abre estas dos URLs:
 
 Debe pasar esto:
 
-- la primera devuelve informacion JSON de la sede
-- la segunda devuelve un `sessionToken`
+- la primera devuelve JSON
+- la segunda devuelve un objeto con `sessionToken`
 
-Si falla una de esas 2, la app no esta lista todavia.
+Si una de esas 2 falla, no sigas a la prueba funcional.
 
-## 17. Paso 12. Activar SSL
-
-En Hostinger activa SSL para:
-
-- `tudominio.com`
-- `www.tudominio.com` si lo usas
-
-No hagas pruebas finales sin SSL activo.
-
-## 18. Paso 13. Probar la app desde navegador
+## 15. Paso 11. Probar la app completa
 
 Abre:
 
-- `https://tudominio.com`
+- `https://tudominio.com/aceptacion?sede=kennedy`
 
 Verifica:
 
-1. la pantalla carga
-2. aparece la sede
-3. se puede avanzar por pasos
+1. carga la pantalla de bienvenida
+2. no aparece `Oops, algo salio mal`
+3. puedes avanzar por pasos
 4. la firma funciona
-5. la confirmacion final responde bien
+5. el registro se envia
+6. aparece la pantalla final
 
-## 19. Paso 14. Prueba real completa
+## 16. Paso 12. Probar que la base y el correo siguen bien
 
-Desde un celular:
+Despues de una prueba real, confirma:
 
-1. abre `https://tudominio.com`
-2. llena el formulario
-3. confirma y firma
-4. envia el registro
+1. existe un nuevo registro en `aceptaciones`
+2. existe movimiento en `correos_log`
+3. llego el correo al usuario
+4. llego el correo administrativo
 
-Luego verifica 4 cosas:
+## 17. Errores comunes
 
-1. aparece pantalla de exito
-2. llega correo al usuario
-3. llega correo a `nortefitevolution360@gmail.com`
-4. en phpMyAdmin aparece el nuevo registro en `aceptaciones`
+### Error: Hostinger no detecta bien la app
 
-## 20. Si algo falla, revisa en este orden
+Casi siempre significa que subiste mal la carpeta.
+
+Debes subir el contenido de `apps/web`, no la carpeta `apps/web` como contenedor.
+
+### Error: `package.json` no aparece donde debe
+
+La app quedo dentro de una carpeta extra. Corrige la estructura.
+
+### Error: subiste por FTP y no cambio nada
+
+Te falto rebuild o restart.
+
+### Error: falla `/backend/api/v1/sedes/kennedy`
+
+Revisa:
 
 1. `DATABASE_URL`
-2. `GMAIL_USER`
-3. `GMAIL_APP_PASSWORD`
-4. Node `20.x`
-5. que subiste solo `apps/web`
-6. que no subiste `node_modules`
-7. que ejecutaste `prisma db push` y `prisma db seed`
-8. que la URL tecnica `/backend/api/v1/sedes/kennedy` responde
+2. que `npm install` corriera bien
+3. que `npx prisma generate` corriera bien
+4. que la app realmente se reinicio
 
-## 21. Conclusión
+### Error: Prisma pide tablas que no existen
 
-Si haces exactamente este orden:
+Solo entonces debes correr `npx prisma db push`.
 
-1. crear MySQL
-2. habilitar Remote MySQL
-3. configurar `apps/web/.env.local`
-4. correr Prisma localmente
-5. revisar phpMyAdmin
-6. subir solo `apps/web`
-7. poner variables en Hostinger
-8. desplegar
-9. probar URLs tecnicas
-10. activar SSL
-11. hacer una prueba real
+## 18. Resumen corto
 
-el despliegue debe quedar exitoso con una sola app y un solo dominio.
+La ruta correcta para tu caso es:
+
+1. subir solo `apps/web`
+2. subirlo directo a una sola carpeta raiz de la app Node.js
+3. no subir `.next`, `node_modules` ni `.env.local`
+4. configurar las 5 variables en Hostinger
+5. correr `npm install && npx prisma generate && npm run build`
+6. reiniciar
+7. probar `/backend/api/v1/sedes/kennedy`
+8. probar `/aceptacion?sede=kennedy`

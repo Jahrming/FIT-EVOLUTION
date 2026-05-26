@@ -1,6 +1,11 @@
 # Variables Exactas
 
-Usa este archivo para copiar y pegar variables sin inventar nombres.
+Estas son las variables vigentes para el despliegue actual:
+
+- una sola app `apps/web`
+- una sola carpeta
+- misma app para UI y rutas `/backend`
+- base de datos ya configurada
 
 ## 1. Variables de Hostinger para produccion
 
@@ -14,44 +19,27 @@ GMAIL_USER=nortefitevolution360@gmail.com
 GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
 ```
 
-Reemplaza:
+## 2. Que significa cada una
 
-- `USUARIO_DB` por el usuario MySQL real
-- `PASSWORD_DB` por la clave MySQL real
-- `HOST_DB` por el host MySQL real de Hostinger
-- `NOMBRE_DB` por el nombre real de la base
-- `TU_CLAVE_DE_APLICACION` por la clave real de Gmail
+- `NEXT_PUBLIC_API_BASE_URL`: deja la base de las llamadas del navegador en `/backend`
+- `NEXT_PUBLIC_APP_URL`: URL publica final del dominio
+- `DATABASE_URL`: conexion real a MySQL
+- `GMAIL_USER`: correo remitente
+- `GMAIL_APP_PASSWORD`: clave de aplicacion del correo
 
-## 2. Variables locales para preparar la base
+## 3. Que NO debes poner
 
-En tu computador usa este archivo:
+No pongas:
 
-- `apps/web/.env.local`
+- `API_PROXY_TARGET`
+- `NEXT_PUBLIC_API_URL`
+- `localhost`
+- `127.0.0.1`
+- rutas de Windows
 
-Ejemplo:
+En esta arquitectura no necesitas `API_PROXY_TARGET` porque `apps/web` ya sirve internamente `/backend/api/v1/...`.
 
-```env
-NEXT_PUBLIC_API_BASE_URL=/backend
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-DATABASE_URL=mysql://USUARIO_DB:PASSWORD_DB@HOST_DB:3306/NOMBRE_DB
-GMAIL_USER=nortefitevolution360@gmail.com
-GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
-```
-
-Si estas trabajando con una base local en tu maquina, ahi si puedes usar un `DATABASE_URL` local.
-
-## 3. Valores que no debes poner mal
-
-No hagas esto:
-
-- no pongas `localhost` en Hostinger
-- no pongas `127.0.0.1` en Hostinger
-- no pongas `API_PROXY_TARGET`
-- no cambies `NEXT_PUBLIC_API_BASE_URL=/backend`
-- no dejes espacios raros en `GMAIL_APP_PASSWORD`
-- no pongas la URL del frontend dentro de `DATABASE_URL`
-
-## 4. Formato correcto del DATABASE_URL
+## 4. Formato correcto de DATABASE_URL
 
 Debe verse asi:
 
@@ -65,19 +53,33 @@ Ejemplo ilustrativo:
 DATABASE_URL=mysql://u123456789_fituser:MiClaveSegura@mysql.hostinger.com:3306/u123456789_fitdb
 ```
 
-## 5. Si tu dominio final usa www
+## 5. Si usas www
 
-La variable publica principal puede seguir siendo:
+Si tu dominio real en produccion es `https://www.tudominio.com`, entonces usa esa URL exacta en:
 
 ```env
-NEXT_PUBLIC_APP_URL=https://tudominio.com
+NEXT_PUBLIC_APP_URL=https://www.tudominio.com
 ```
 
-Si tu dominio canonico real es `https://www.tudominio.com`, entonces usa esa URL exacta.
+## 6. Variables locales para probar con la base remota
 
-## 6. Regla simple
+Si quieres probar localmente con la misma base remota, usa en tu computador:
 
-En produccion, esta app solo necesita 5 variables:
+- `apps/web/.env.local`
+
+Ejemplo:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+DATABASE_URL=mysql://USUARIO_DB:PASSWORD_DB@HOST_DB:3306/NOMBRE_DB
+GMAIL_USER=nortefitevolution360@gmail.com
+GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
+```
+
+## 7. Regla simple
+
+Para produccion en Hostinger, esta app solo necesita estas 5 variables:
 
 1. `NEXT_PUBLIC_API_BASE_URL`
 2. `NEXT_PUBLIC_APP_URL`

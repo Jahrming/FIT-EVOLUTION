@@ -1,44 +1,50 @@
 # Hostinger
 
-Documentacion de despliegue para `FIT EVOLUTION360` en Hostinger.
-
-Estado actual del proyecto:
+Documentacion vigente para desplegar `FIT EVOLUTION360` en Hostinger con este escenario:
 
 - una sola app Node.js: `apps/web`
-- un solo dominio visible: `tudominio.com`
-- una sola base de datos: MySQL de Hostinger
-- `apps/api` ya no es parte del despliegue publico recomendado
+- una sola carpeta de despliegue en Hostinger
+- subida manual por `FTP` o `File Manager`
+- base de datos MySQL ya creada y ya configurada
+- mismo dominio para web y rutas tecnicas `/backend`
 
-## Archivos
+## Estado real del proyecto
 
-- `01_GUIA_COMPLETA_NO_TECNICA.md`
-- `02_QUE_SUBIR_A_HOSTINGER.md`
-- `03_VARIABLES_EXACTAS.md`
-- `04_PHPMYADMIN_Y_MYSQL.md`
-- `05_CHECKLIST_FINAL.md`
+La arquitectura recomendada y soportada por el codigo actual es:
 
-## Orden recomendado
+- `apps/web` es la unica app que se despliega
+- `apps/web` sirve la UI y tambien las rutas `/backend/api/v1/...`
+- `apps/api` no hace parte del despliegue manual actual en Hostinger
+
+## Documentos vigentes
+
+Lee en este orden:
 
 1. `01_GUIA_COMPLETA_NO_TECNICA.md`
-2. `03_VARIABLES_EXACTAS.md`
-3. `02_QUE_SUBIR_A_HOSTINGER.md`
-4. `04_PHPMYADMIN_Y_MYSQL.md`
-5. `05_CHECKLIST_FINAL.md`
+2. `02_QUE_SUBIR_A_HOSTINGER.md`
+3. `03_VARIABLES_EXACTAS.md`
+4. `05_CHECKLIST_FINAL.md`
 
-## Base oficial consultada
+Complemento tecnico corto:
 
-Informacion contrastada el `25 de mayo de 2026` con documentacion oficial de Hostinger:
+- `../DESPLIEGUE_HOSTINGER.md`
 
-- Node.js Web Apps: https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/
-- Migracion de app Node.js: https://www.hostinger.com/support/how-to-migrate-a-node-js-application-to-hostinger/
-- Conexion MySQL para Node.js: https://www.hostinger.com/support/connecting-a-hostinger-mysql-database-to-a-node-js-application/
-- Remote MySQL: https://www.hostinger.com/support/1583546-how-to-set-up-remote-mysql-access-in-hostinger/
-- Gestion de bases y phpMyAdmin: https://www.hostinger.com/support/1864454-how-to-manage-mysql-databases-in-hostinger/
+## Nota importante
 
-Resumen de esas fuentes:
+Subir archivos por FTP no termina el despliegue por si solo.
 
-- Hostinger soporta Node.js Web Apps en planes `Business` y `Cloud`
-- soporta `Next.js`
-- soporta despliegue por `GitHub` o por `ZIP`
-- soporta versiones Node `18.x`, `20.x`, `22.x` y `24.x`
-- para esta app debes usar `Node 20.x`
+Despues de subir los archivos a la carpeta de la app Node.js en Hostinger, tambien debes:
+
+1. revisar variables de entorno
+2. correr `install`
+3. correr `build`
+4. reiniciar o redeployar la app
+
+## Documentos antiguos
+
+Los archivos antiguos fuera de esta carpeta se dejaron solo como punteros:
+
+- `../HOSTINGER_GUIA_PARA_NO_TECNICOS.md`
+- `../HOSTINGER_DESPLIEGUE_PASO_A_PASO.md`
+
+Si ves instrucciones que hablen de `apps/api`, `api.tudominio.com` o `2 apps Node.js`, ignoralas para este despliegue.

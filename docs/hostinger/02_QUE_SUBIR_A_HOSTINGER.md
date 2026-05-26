@@ -1,8 +1,8 @@
 # Que Subir A Hostinger
 
-Esta guia evita el error mas comun: subir el proyecto equivocado.
+Esta guia aplica al despliegue manual por FTP o `File Manager`.
 
-## 1. Que SI debes subir
+## 1. Regla principal
 
 Debes subir solo el contenido de:
 
@@ -10,90 +10,97 @@ Debes subir solo el contenido de:
 
 No debes subir:
 
-- la raiz completa del monorepo
+- la raiz completa del proyecto
 - `apps/api`
-- `node_modules`
-- `.next`
-- `.env.local`
+- una carpeta extra llamada `apps`
+- una carpeta extra llamada `web`
 
-## 2. Que archivos deben existir dentro de lo que subes
+## 2. Como debe verse la carpeta final en Hostinger
 
-Como minimo, dentro del paquete final deben quedar visibles:
+Dentro de la carpeta raiz de la app Node.js en Hostinger, al abrirla debes ver directamente:
 
 - `package.json`
 - `next.config.js`
 - `app`
-- `components`
 - `lib`
 - `prisma`
-- `public`
-- `styles`
-- `tailwind.config.ts`
 - `postcss.config.js`
+- `tailwind.config.ts`
 - `tsconfig.json`
+- `next-env.d.ts`
 - `.eslintrc.json`
 
-## 3. Metodo recomendado si usas GitHub
+Si eso no es lo que ves, la subida quedo mal estructurada.
 
-Si Hostinger despliega desde GitHub:
+## 3. Ejemplo correcto
 
-- el repositorio puede ser el monorepo completo
-- pero la configuracion de despliegue debe apuntar al proyecto `apps/web`
+Correcto:
 
-Antes de pulsar deploy, confirma que la app seleccionada es la del frontend actual con backend interno, no `apps/api`.
+```text
+/carpeta-de-tu-app/
+  package.json
+  next.config.js
+  app/
+  lib/
+  prisma/
+```
 
-## 4. Metodo recomendado si usas ZIP
+## 4. Ejemplos incorrectos
 
-Si Hostinger despliega por ZIP:
+Incorrecto:
 
-1. entra a `apps/web`
-2. selecciona todo el contenido dentro de esa carpeta
-3. comprime solo ese contenido
-4. nombre sugerido del archivo: `fit-evolution360-hostinger.zip`
+```text
+/carpeta-de-tu-app/
+  apps/
+    web/
+      package.json
+```
 
-## 5. Como comprobar que el ZIP esta bien hecho
+Incorrecto:
 
-Abre el ZIP en tu computador.
+```text
+/carpeta-de-tu-app/
+  fit-evolution360/
+    apps/
+      web/
+        package.json
+```
 
-Si esta correcto, al abrirlo debes ver directamente:
+## 5. Que nunca debes subir
 
-- `package.json`
-- `app`
-- `lib`
-- `prisma`
-
-Si al abrirlo primero ves una carpeta intermedia como:
-
-- `apps`
-- `web`
-- `fit-evolution360`
-
-entonces el ZIP esta mal hecho y Hostinger puede detectar mal la app.
-
-## 6. Que NO debes incluir nunca
-
-No metas dentro del ZIP:
+No subas:
 
 - `node_modules`
 - `.next`
-- `dist`
-- `.turbo`
 - `.env`
 - `.env.local`
+- `tsconfig.tsbuildinfo`
+- `.turbo`
+- `dist`
 - archivos temporales del sistema
 
-## 7. Senales de que subiste el paquete incorrecto
+## 6. Que si puedes reemplazar
 
-Si en Hostinger ves alguno de estos sintomas, casi siempre subiste mal el proyecto:
+Cuando hagas un nuevo deploy manual, normalmente vas a reemplazar:
 
-- no detecta `Next.js`
-- no encuentra `package.json`
-- no corre `npm run build`
-- intenta arrancar otra app distinta
-- te pide un `entry file` raro
+- `app`
+- `lib`
+- `prisma`
+- `package.json`
+- `next.config.js`
+- `postcss.config.js`
+- `tailwind.config.ts`
+- `tsconfig.json`
 
-## 8. Regla simple
+## 7. Cuando debes limpiar archivos viejos
 
-Para este proyecto, recuerda esta regla:
+Si renombraste o eliminaste archivos en local, recuerda que FTP no siempre borra lo viejo automaticamente.
 
-- si estas desplegando en Hostinger, casi siempre solo necesitas `apps/web`
+Entonces:
+
+- si solo actualizaste archivos existentes, con sobrescribir suele bastar
+- si eliminaste archivos o cambiaste estructura, borra esos archivos viejos tambien en Hostinger
+
+## 8. Regla simple final
+
+Si en la carpeta final de Hostinger ves `package.json` sin abrir ninguna subcarpeta intermedia, vas bien.

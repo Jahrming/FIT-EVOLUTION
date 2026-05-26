@@ -1,54 +1,93 @@
 # Despliegue Hostinger
 
-Guia corta para desplegar el proyecto en un entorno tipo Hostinger o VPS con MySQL.
+Resumen tecnico vigente para Hostinger.
 
-## Topologia recomendada
+## Arquitectura actual
 
-- dominio publico: `https://tudominio.com`
-- frontend Next.js: mismo dominio
-- backend NestJS: proceso interno en `http://127.0.0.1:3001`
-- base de datos: MySQL
+- una sola app: `apps/web`
+- una sola carpeta de despliegue en Hostinger
+- una sola base de datos MySQL ya existente
+- misma app para frontend y endpoints `/backend/api/v1/...`
 
-El frontend usa `/backend` como ruta publica y Next.js reenvia internamente al backend real con `API_PROXY_TARGET`.
-
-## Variables del frontend
-
-Archivo sugerido: `apps/web/.env.local`
+## Variables de produccion
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=/backend
-API_PROXY_TARGET=http://127.0.0.1:3001
 NEXT_PUBLIC_APP_URL=https://tudominio.com
+DATABASE_URL=mysql://USUARIO_DB:PASSWORD_DB@HOST_DB:3306/NOMBRE_DB
+GMAIL_USER=nortefitevolution360@gmail.com
+GMAIL_APP_PASSWORD=TU_CLAVE_DE_APLICACION
 ```
 
-## Variables del backend
+No uses:
 
-Archivo sugerido: `apps/api/.env`
+- `API_PROXY_TARGET`
+- `NEXT_PUBLIC_API_URL`
 
-```env
-PORT=3001
-DATABASE_URL="mysql://usuario:password@127.0.0.1:3306/fitevolution360_prod"
-CORS_ORIGIN=https://tudominio.com,https://www.tudominio.com
-GMAIL_USER=tu_correo@gmail.com
-GMAIL_APP_PASSWORD=tu_app_password
+## Que subir
+
+Sube solo el contenido de:
+
+- `apps/web`
+
+No subas:
+
+- `node_modules`
+- `.next`
+- `.env.local`
+- `apps/api`
+
+## Estructura correcta en Hostinger
+
+La carpeta raiz final debe verse asi:
+
+```text
+package.json
+next.config.js
+app/
+lib/
+prisma/
 ```
 
-## Preparacion
+## Comandos
+
+### Install
 
 ```bash
 npm install
-cd apps/api
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-cd ../..
-npm run build
 ```
 
-## Puntos clave
+### Build
 
-- No expongas `localhost:3001` al navegador del cliente.
-- Mantien `API_PROXY_TARGET` como URL interna del backend.
-- Usa MySQL real en `DATABASE_URL`.
-- Asegura que `CORS_ORIGIN` incluya todos los dominios publicos del frontend.
-- Si cambias el dominio, actualiza tambien `NEXT_PUBLIC_APP_URL` para los QR.
+```bash
+npm install && npx prisma generate && npm run build
+```
+
+### Start
+
+```bash
+npm run start
+```
+
+## Sobre Prisma
+
+Si no cambiaste `apps/web/prisma/schema.prisma`, no necesitas correr `prisma db push` en cada deploy.
+
+Solo corre `prisma db push` cuando cambiaste el esquema de base de datos.
+
+## Validacion minima
+
+Deben responder:
+
+- `https://tudominio.com/backend/api/v1/sedes/kennedy`
+- `https://tudominio.com/backend/api/v1/session-token`
+
+Y luego debes probar:
+
+- `https://tudominio.com/aceptacion?sede=kennedy`
+
+## Documento principal
+
+Para la guia paso a paso completa, usa:
+
+- [docs/hostinger/01_GUIA_COMPLETA_NO_TECNICA.md](/D:/Jose/UDI/PRACTICAS/fit-evolution360/docs/hostinger/01_GUIA_COMPLETA_NO_TECNICA.md)
